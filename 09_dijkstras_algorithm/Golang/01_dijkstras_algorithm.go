@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"slices"
 )
 
 var graph map[string]map[string]float64
@@ -47,14 +48,14 @@ func main() {
 		// Go through all the neighbors of this node.
 		neighbors := graph[node]
 
-		for node := range neighbors {
-			new_cost := cost + neighbors[node]
+		for neighbor := range neighbors {
+			new_cost := cost + neighbors[neighbor]
 			// If it's cheaper to get to this neighbor by going through this node...
-			if costs[node] > new_cost {
+			if costs[neighbor] > new_cost {
 				// ... update the cost for this node.
-				costs[node] = new_cost
+				costs[neighbor] = new_cost
 				// This node becomes the new parent for this neighbor.
-				parents[node] = node
+				parents[neighbor] = node
 			}
 		}
 		// Mark the node as processed.
@@ -63,7 +64,10 @@ func main() {
 		node = find_lowest_cost_node(costs)
 	}
 
+	fmt.Println("Final Costs:")
 	fmt.Println(costs)
+	fmt.Println("Path to destination:")
+	print_graph_path(parents, "fin")
 
 }
 
@@ -75,7 +79,7 @@ func find_lowest_cost_node(costs map[string]float64) string {
 		// fmt.Println("Node:", node, "Value:", value)
 		cost := costs[node]
 		// If it's the lowest cost so far and hasn't been processed yet...
-		if cost < lowest_cost && !contains(processed, node) {
+		if cost < lowest_cost && !slices.Contains(processed, node) {
 			// ... set it as the new lowest-cost node.
 			lowest_cost = cost
 			lowest_cost_node = node
@@ -84,11 +88,16 @@ func find_lowest_cost_node(costs map[string]float64) string {
 	return lowest_cost_node
 }
 
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
+func print_graph_path(parents map[string]string, node string) {
+	if node == "" {
+		return
 	}
-	return false
+
+	print_graph_path(parents, parents[node])
+	if(node == "fin") {
+		fmt.Printf("%s", node)
+	} else {
+		fmt.Printf("%s -> ", node)
+	}
+
 }
